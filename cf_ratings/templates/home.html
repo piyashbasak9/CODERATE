@@ -1,149 +1,170 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="section">
-  <div class="container">
-
-    <div class="level">
-      <div class="level-left">
-        <h1 class="title">All Problems</h1>
-        <p class="subtitle" style="margin-left: 12px;">
-          Track and rate Codeforces problems.
+<div class="columns is-vcentered mb-5">
+    <div class="column">
+        <h1 class="title is-3 has-text-weight-bold" style="color: #0f172a;">
+            Problem Set
+        </h1>
+        <p class="subtitle is-6 has-text-grey">
+            Browse, solve, and rate problems from Codeforces.
         </p>
-      </div>
-      <div class="level-right">
+    </div>
+    <div class="column is-narrow">
         {% if user.is_authenticated %}
-          <a class="button is-primary is-rounded" href="{% url 'add_problem' %}">
-            <span class="icon"><i class="fas fa-plus"></i></span>
+          <a class="button is-primary is-rounded has-shadow" href="{% url 'add_problem' %}">
+            <span class="icon is-small"><i class="fas fa-plus"></i></span>
             <span>Add Problem</span>
           </a>
         {% endif %}
-      </div>
+    </div>
+</div>
+
+<div class="card" style="border: none; box-shadow: none;">
+  <div class="card-content p-0">
+    <div class="table-container">
+      <table class="table is-fullwidth is-hoverable" style="background: transparent;">
+        <thead>
+          <tr style="border-bottom: 2px solid #f1f5f9;">
+            <th class="has-text-grey-light is-size-7 is-uppercase">ID</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase" style="width: 25%;">Problem Name</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase">Tags</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered">Avg Rating</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered">Your Rating</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered" style="width: 200px;">Status</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase has-text-right">Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in problems %}
+            <tr style="transition: background-color 0.2s;">
+              <td class="is-vcentered">
+                <span class="tag is-white has-text-weight-bold" style="border: 1px solid #e2e8f0; font-family: monospace;">
+                    {{ p.problem_id }}
+                </span>
+              </td>
+
+              <td class="is-vcentered">
+                <a href="{% url 'problem_detail' p.problem_id %}" class="has-text-weight-semibold has-text-dark" style="text-decoration: none;">
+                  {{ p.name }}
+                </a>
+              </td>
+
+              <td class="is-vcentered">
+                <div class="tags">
+                  {% for t in p.tags.all|slice:":3" %}
+                    <span class="tag is-light is-rounded is-small" style="font-size: 0.7rem;">
+                      {{ t.name }}
+                    </span>
+                  {% empty %}
+                    <span class="is-size-7 has-text-grey-light">-</span>
+                  {% endfor %}
+                  {% if p.tags.all|length > 3 %}
+                    <span class="tag is-white is-rounded is-small">+{{ p.tags.all|length|add:"-3" }}</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td class="is-vcentered has-text-centered">
+                {% if p.average_rating > 0 %}
+                  <span class="tag is-warning is-light is-rounded has-text-weight-bold">
+                    <i class="fas fa-star mr-1" style="color: #d97706;"></i> {{ p.average_rating|floatformat:1 }}
+                  </span>
+                {% else %}
+                  <span class="has-text-grey-light is-size-7">-</span>
+                {% endif %}
+              </td>
+
+              <td class="is-vcentered">
+                {% if user.is_authenticated %}
+                  <form method="post" action="{% url 'rate_problem' p.problem_id %}" class="is-flex is-justify-content-center">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="field has-addons">
+                      <div class="control">
+                        <div class="select is-small is-rounded">
+                          <select name="value" style="border-color: #e2e8f0;">
+                            <option value="0" {% if p.user_rating == 0 %}selected{% endif %}>-</option>
+                            {% for val in rating_choices %}
+                              {% if val > 0 %}
+                                <option value="{{ val }}" {% if p.user_rating == val %}selected{% endif %}>{{ val }}</option>
+                              {% endif %}
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="control">
+                        <button class="button is-small is-primary is-light is-rounded" title="Save Rating">
+                          <i class="fas fa-check"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                {% else %}
+                  <div class="has-text-centered">
+                      <a href="{% url 'login' %}" class="is-size-7 has-text-grey">Log in</a>
+                  </div>
+                {% endif %}
+              </td>
+
+              <td class="is-vcentered has-text-centered">
+                {% if user.is_authenticated %}
+                  <div class="buttons is-centered are-small">
+                    <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="margin-bottom: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="pending">
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="button {% if p.user_status == 'pending' %}is-warning{% else %}is-light{% endif %} is-rounded">
+                            <span class="icon is-small"><i class="fas fa-clock"></i></span>
+                            <span>Pending</span>
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="margin-bottom: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="solved">
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="button {% if p.user_status == 'solved' %}is-success{% else %}is-light{% endif %} is-rounded">
+                            <span class="icon is-small"><i class="fas fa-check"></i></span>
+                            <span>Solved</span>
+                        </button>
+                    </form>
+                  </div>
+                {% else %}
+                   <span class="tag is-light">Login to track</span>
+                {% endif %}
+              </td>
+
+              <td class="is-vcentered has-text-right">
+                <a class="button is-small is-ghost"
+                   href="https://codeforces.com/problemset/problem/{{ p.contest_id }}/{{ p.index }}"
+                   target="_blank" rel="noopener noreferrer">
+                  <span class="icon is-small"><i class="fas fa-external-link-alt"></i></span>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7">
+                <div class="has-text-centered py-6">
+                    <span class="icon is-large has-text-grey-lighter mb-3">
+                        <i class="fas fa-folder-open fa-3x"></i>
+                    </span>
+                    <p class="is-size-6 has-text-grey">No problems found.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'add_problem' %}" class="button is-text is-small mt-2">Add a problem now</a>
+                    {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
-    <div class="card">
-      <header class="card-header">
-        <p class="card-header-title">
-          Problem List
-        </p>
-      </header>
-
-      <div class="card-content">
-        <div class="table-container">
-          <table class="table is-fullwidth is-striped is-hoverable is-narrow">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Problem ID</th>
-                <th>Tags</th>
-                <th>Avg Rating</th>
-                <th>Your Rating</th>
-                <th>Link</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for p in problems %}
-                <tr>
-                  <td>
-                    <a href="{% url 'problem_detail' p.problem_id %}">
-                      {{ p.name }}
-                    </a>
-                  </td>
-                  <td><span class="tag is-light">{{ p.problem_id }}</span></td>
-                  <td>
-                    {% for t in p.tags.all %}
-                      <span class="tag is-info is-light" style="margin-bottom: 4px;">
-                        {{ t.name }}
-                      </span>
-                    {% empty %}
-                      <span class="has-text-grey">No tags</span>
-                    {% endfor %}
-                  </td>
-                  <td>
-                    {% if p.average_rating %}
-                      <span class="tag is-warning is-light">
-                        ⭐ {{ p.average_rating }}
-                      </span>
-                    {% else %}
-                      <span class="has-text-grey">Not rated</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if user.is_authenticated %}
-                      <form method="post" action="{% url 'rate_problem' p.problem_id %}"
-                            class="field has-addons" style="margin-bottom: 0;">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ request.path }}">
-                        <div class="control">
-                          <div class="select is-small">
-                            <select name="value">
-                              {% for val in rating_choices %}
-                                <option value="{{ val }}" {% if p.user_rating == val %}selected{% endif %}>
-                                  {{ val }}
-                                </option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                        </div>
-                        <div class="control">
-                          <button class="button is-small is-info">
-                            Save
-                          </button>
-                        </div>
-                      </form>
-                    {% else %}
-                      <a href="{% url 'login' %}">Login to rate</a>
-                    {% endif %}
-                  </td>
-                  <td>
-                    <a class="button is-link is-light is-small"
-                       href="https://codeforces.com/problemset/problem/{{ p.contest_id }}/{{ p.index }}"
-                       target="_blank" rel="noopener noreferrer">
-                      Open
-                    </a>
-                  </td>
-                  <td>
-                    {% if user.is_authenticated %}
-                      <div class="buttons are-small">
-                        <form method="post" action="{% url 'mark_problem' p.problem_id %}">
-                          {% csrf_token %}
-                          <input type="hidden" name="status" value="pending">
-                          <input type="hidden" name="next" value="{{ request.path }}">
-                          <button class="button {% if p.user_status == 'pending' %}is-warning{% else %}is-light{% endif %}">
-                            Pending
-                          </button>
-                        </form>
-                        <form method="post" action="{% url 'mark_problem' p.problem_id %}">
-                          {% csrf_token %}
-                          <input type="hidden" name="status" value="solved">
-                          <input type="hidden" name="next" value="{{ request.path }}">
-                          <button class="button {% if p.user_status == 'solved' %}is-success{% else %}is-light{% endif %}">
-                            Solved
-                          </button>
-                        </form>
-                      </div>
-                    {% else %}
-                      <a href="{% url 'login' %}" class="button is-small is-light">
-                        Login
-                      </a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% empty %}
-                <tr>
-                  <td colspan="7" class="has-text-centered has-text-grey">
-                    No problems yet. Add your first one!
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        {# Optional: pagination block #}
-        {% if is_paginated %}
-          <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+    {% if is_paginated %}
+      <div class="section py-4">
+        <nav class="pagination is-centered is-rounded is-small" role="navigation" aria-label="pagination">
             {% if page_obj.has_previous %}
               <a class="pagination-previous" href="?page={{ page_obj.previous_page_number }}">Previous</a>
             {% else %}
@@ -159,21 +180,15 @@
             <ul class="pagination-list">
               {% for num in page_obj.paginator.page_range %}
                 {% if num == page_obj.number %}
-                  <li>
-                    <a class="pagination-link is-current">{{ num }}</a>
-                  </li>
+                  <li><a class="pagination-link is-current" aria-current="page">{{ num }}</a></li>
                 {% else %}
-                  <li>
-                    <a class="pagination-link" href="?page={{ num }}">{{ num }}</a>
-                  </li>
+                  <li><a class="pagination-link" href="?page={{ num }}">{{ num }}</a></li>
                 {% endif %}
               {% endfor %}
             </ul>
-          </nav>
-        {% endif %}
+        </nav>
       </div>
-    </div>
-
+    {% endif %}
   </div>
 </div>
 {% endblock %}

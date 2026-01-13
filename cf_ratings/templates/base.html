@@ -1,138 +1,221 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="has-navbar-fixed-top">
 <head>
     <meta charset="utf-8">
     <title>CF Ratings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-      body {
-        background: #0f172a;
-        min-height: 100vh;
+      :root {
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-color: #334155;
+        --title-color: #0f172a;
+        --primary-color: #4f46e5;
+        --primary-gradient: linear-gradient(135deg, #4f46e5, #9333ea);
       }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* --- Navbar Styling --- */
+      .navbar {
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      }
+
+      .navbar-item, .navbar-link {
+        color: #64748b !important;
+        font-weight: 500;
+        transition: color 0.2s ease;
+      }
+
+      .navbar-item:hover, .navbar-link:hover {
+        background-color: transparent !important;
+        color: var(--primary-color) !important;
+      }
+
       .brand-gradient {
-        background: linear-gradient(135deg, #6366f1, #ec4899);
+        background: var(--primary-gradient);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        font-weight: 700;
+        font-weight: 800;
+        font-size: 1.5rem;
       }
-      .main-card {
-        margin-top: 1.5rem;
+
+      /* --- Main Content (UPDATED WIDTH) --- */
+      .main-container {
+        flex: 1;
+        padding: 3rem 1.5rem;
+        /* CHANGED: Increased from 1024px to 1400px */
+        max-width: 1400px; 
+        margin: 0 auto;
+        width: 100%;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      /* --- Cards --- */
+      .card {
+        background-color: var(--card-bg);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        color: var(--text-color);
+      }
+      
+      .card-content {
+        padding: 2.5rem;
+      }
+
+      .title { color: var(--title-color); }
+      .subtitle { color: #64748b; }
+
+      /* --- Buttons --- */
+      .button.is-primary {
+        background: var(--primary-gradient);
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+        transition: transform 0.1s;
+      }
+      .button.is-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+      .button.is-light {
+        background-color: #f1f5f9;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+      }
+      .button.is-light:hover { background-color: #e2e8f0; }
+
+      /* --- Footer --- */
+      .footer {
+        background-color: #ffffff;
+        padding: 3rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        color: #64748b;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      @media screen and (max-width: 1023px) {
+        .navbar-menu { box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
       }
     </style>
 </head>
 <body>
-<section class="hero is-primary is-small">
-  <div class="hero-head">
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-      <div class="container">
-        <div class="navbar-brand">
-          <a class="navbar-item" href="{% url 'home' %}">
-            <span class="brand-gradient">CF Ratings</span>
-          </a>
 
-          <a role="button" class="navbar-burger" aria-label="menu"
-             aria-expanded="false" data-target="navbarMain">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </a>
-        </div>
+<nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="{% url 'home' %}">
+        <span class="brand-gradient"><i class="fas fa-code mr-2"></i>CF Ratings</span>
+      </a>
+      <a role="button" class="navbar-burger" aria-label="menu"
+         aria-expanded="false" data-target="navbarMain">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
 
-        <div id="navbarMain" class="navbar-menu">
-          <div class="navbar-start">
-            <a class="navbar-item" href="{% url 'home' %}">
-              <span class="icon"><i class="fas fa-home"></i></span>
-              <span>Home</span>
-            </a>
-            <a class="navbar-item" href="{% url 'search' %}">
-              <span class="icon"><i class="fas fa-search"></i></span>
-              <span>Search</span>
-            </a>
-            <a class="navbar-item" href="{% url 'users_list' %}">
-              <span class="icon"><i class="fas fa-users"></i></span>
-              <span>Users</span>
-            </a>
-          </div>
-
-          <div class="navbar-end">
-            {% if user.is_authenticated %}
-              <div class="navbar-item">
-                <span class="icon"><i class="fas fa-user-circle"></i></span>
-                <span class="ml-1">
-                  Hello,
-                  <a href="{% url 'profile' user.username %}" class="has-text-weight-semibold">
-                    {{ user.username }}
-                  </a>
-                </span>
-              </div>
-              <div class="navbar-item">
-                <a class="button is-light is-small" href="{% url 'logout' %}">
-                  <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-                  <span>Logout</span>
-                </a>
-              </div>
-            {% else %}
-              <div class="navbar-item">
-                <a class="button is-light is-small" href="{% url 'login' %}">
-                  <span class="icon"><i class="fas fa-sign-in-alt"></i></span>
-                  <span>Login</span>
-                </a>
-              </div>
-              <div class="navbar-item">
-                <a class="button is-primary is-inverted is-outlined is-small"
-                   href="{% url 'register' %}">
-                  <span class="icon"><i class="fas fa-user-plus"></i></span>
-                  <span>Register</span>
-                </a>
-              </div>
-            {% endif %}
-          </div>
-        </div>
+    <div id="navbarMain" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="{% url 'home' %}">
+          <span class="icon-text"><span class="icon"><i class="fas fa-home"></i></span><span>Home</span></span>
+        </a>
+        <a class="navbar-item" href="{% url 'search' %}">
+          <span class="icon-text"><span class="icon"><i class="fas fa-search"></i></span><span>Search</span></span>
+        </a>
+        <a class="navbar-item" href="{% url 'users_list' %}">
+          <span class="icon-text"><span class="icon"><i class="fas fa-users"></i></span><span>Users</span></span>
+        </a>
       </div>
-    </nav>
-  </div>
 
-  <div class="hero-body">
-    <div class="container">
-      <div class="card main-card">
-        <div class="card-content">
-          {% if messages %}
-            {% for message in messages %}
-              <div class="notification is-{{ message.tags }}">
-                <button class="delete"></button>
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-
-          {% block content %}{% endblock %}
-        </div>
+      <div class="navbar-end">
+        {% if user.is_authenticated %}
+          <div class="navbar-item">
+            <div class="field is-grouped">
+                <p class="control">
+                    <a href="{% url 'profile' user.username %}" class="button is-small is-light is-rounded">
+                        <span class="icon"><i class="fas fa-user"></i></span>
+                        <span>{{ user.username }}</span>
+                    </a>
+                </p>
+                <p class="control">
+                    <a class="button is-small is-danger is-outlined is-rounded" href="{% url 'logout' %}">
+                      <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                    </a>
+                </p>
+            </div>
+          </div>
+        {% else %}
+          <div class="navbar-item">
+            <div class="buttons">
+              <a class="button is-primary is-small is-rounded" href="{% url 'register' %}"><strong>Sign up</strong></a>
+              <a class="button is-light is-small is-rounded" href="{% url 'login' %}">Log in</a>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
+</nav>
+
+<div style="height: 3.5rem;"></div>
+
+<section class="main-container">
+    {% if messages %}
+        <div class="columns is-centered">
+            <div class="column is-three-quarters">
+                {% for message in messages %}
+                  <div class="notification is-{{ message.tags }} is-light">
+                    <button class="delete"></button>
+                    {{ message }}
+                  </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-content">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
 </section>
 
-<footer class="footer has-background-dark has-text-light" style="padding:1.25rem 0; margin-top:1.25rem">
+<footer class="footer">
   <div class="container">
-    <div class="columns is-mobile is-vcentered">
-      <div class="column">
-        <p class="is-size-7">&copy; {% now "Y" %} <span class="has-text-weight-semibold">CF Ratings</span> — Community Problem Ratings</p>
-        <p class="is-size-7">Built with ❤️ and <span class="has-text-weight-semibold">Django</span></p>
-      </div>
-      <div class="column has-text-right">
-        <p class="is-size-7"><a class="has-text-light" href="https://github.com/" target="_blank" rel="noopener noreferrer"><span class="icon"><i class="fab fa-github"></i></span> Source</a></p>
-      </div>
+    <div class="content has-text-centered">
+      <p>
+        <strong style="color: #0f172a;">CF Ratings</strong>
+        <br>
+        <span class="is-size-7">Built for the community with <span style="color: #9333ea;">Django</span></span>
+      </p>
     </div>
   </div>
 </footer>
 
 <script>
-  // simple burger toggle
   document.addEventListener('DOMContentLoaded', () => {
     const burgers = Array.from(document.querySelectorAll('.navbar-burger'));
     burgers.forEach(burger => {
@@ -140,18 +223,15 @@
         const targetId = burger.dataset.target;
         const target = document.getElementById(targetId);
         burger.classList.toggle('is-active');
-        if (target) {
-          target.classList.toggle('is-active');
-        }
+        if (target) { target.classList.toggle('is-active'); }
       });
     });
-
-    // close notifications
     const deletes = Array.from(document.querySelectorAll('.notification .delete'));
     deletes.forEach(del => {
       del.addEventListener('click', () => {
-        const parent = del.parentNode;
-        if (parent) parent.parentNode.removeChild(parent);
+        const notification = del.parentNode;
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
       });
     });
   });
