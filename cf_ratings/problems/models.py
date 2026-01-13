@@ -31,6 +31,8 @@ class Problem(models.Model):
     index = models.CharField(max_length=10)
     tags = models.ManyToManyField(Tag, related_name='problems')
     average_rating = models.FloatField(default=0.0)
+    # Codeforces-provided difficulty rating (e.g., 1600). Nullable if not known.
+    codeforces_rating = models.IntegerField(blank=True, null=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='owned_problems')
 
     def __str__(self):

@@ -105,6 +105,7 @@
                         <th class="has-text-grey-light is-size-7">ID</th>
                         <th class="has-text-grey-light is-size-7">Name</th>
                         <th class="has-text-grey-light is-size-7">Tags</th>
+                        <th class="has-text-grey-light is-size-7 has-text-centered">CF Rating</th>
                         <th class="has-text-grey-light is-size-7 has-text-centered">Avg Rating</th>
                         <th class="has-text-grey-light is-size-7 has-text-centered">Your Rating</th>
                         <th class="has-text-grey-light is-size-7 has-text-centered">Status</th>
@@ -125,6 +126,15 @@
                                     {% endfor %}
                                 </div>
                             </td>
+
+                            <td class="is-vcentered has-text-centered">
+                                {% if p.codeforces_rating %}
+                                    <span class="tag is-info is-light">{{ p.codeforces_rating }}</span>
+                                {% else %}
+                                    <span class="is-size-7 has-text-grey-light">-</span>
+                                {% endif %}
+                            </td>
+
                             <td class="is-vcentered has-text-centered">
                                 {% if p.average_rating > 0 %}
                                     <span class="tag is-warning is-light is-rounded">

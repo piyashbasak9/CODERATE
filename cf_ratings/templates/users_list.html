@@ -1,50 +1,122 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1 class="title">Users</h1>
+<div class="has-text-centered mb-6">
+    <h1 class="title is-3" style="color: #0f172a;">Community Members</h1>
+    <p class="subtitle is-6 has-text-grey">
+        Meet the top contributors and problem solvers.
+    </p>
+</div>
+
 {% if users_data %}
   <div class="columns is-multiline">
     {% for item in users_data %}
-      <div class="column is-one-third">
-        <div class="box">
-          <div class="media">
-            <div class="media-left">
-              {% if item.profile.profile_picture %}
+      <div class="column is-one-third-desktop is-half-tablet">
+        
+        <div class="card user-card">
+          <div class="card-content">
+            <div class="media">
+              
+              <div class="media-left">
                 <figure class="image is-64x64">
-                  <img src="{{ item.profile.profile_picture.url }}" alt="{{ item.user.username }}">
+                  {% if item.profile.profile_picture %}
+                    <img class="is-rounded" src="{{ item.profile.profile_picture.url }}" alt="{{ item.user.username }}" style="object-fit: cover; border: 2px solid #e2e8f0;">
+                  {% else %}
+                    <img class="is-rounded" src="https://ui-avatars.com/api/?name={{ item.user.username }}&background=random&size=64" alt="{{ item.user.username }}">
+                  {% endif %}
                 </figure>
-              {% else %}
-                <figure class="image is-64x64">
-                  <img src="https://via.placeholder.com/64" alt="{{ item.user.username }}">
-                </figure>
-              {% endif %}
+              </div>
+              
+              <div class="media-content">
+                <p class="title is-5 mb-1">
+                    <a href="{% url 'profile' item.user.username %}" class="has-text-dark hover-primary">
+                        {{ item.user.username }}
+                    </a>
+                </p>
+                <div class="tags has-addons mb-0">
+                    {% if item.profile.max_rating %}
+                        <span class="tag is-dark is-rounded is-small">Max</span>
+                        <span class="tag is-primary is-light is-rounded is-small">{{ item.profile.max_rating }}</span>
+                    {% else %}
+                        <span class="tag is-light is-rounded is-small">Unrated</span>
+                    {% endif %}
+                </div>
+              </div>
             </div>
-            <div class="media-content">
-              <p class="title is-5"><a href="{% url 'profile' item.user.username %}">{{ item.user.username }}</a></p>
-              <p class="subtitle is-6">CF Max Rating: {{ item.profile.max_rating|default:'-' }}</p>
-              <p>
-                {% if item.stars > 0 %}
-                  <strong>Contributor:</strong>
-                  {% for i in "12345"|slice:":item.stars" %}★{% endfor %}
-                  ({{ item.contrib_count }})
-                {% else %}
-                  <strong>Contributor:</strong>  ({{ item.contrib_count }})
-                {% endif %}
-              </p>
-              <p style="margin-top:8px">
+
+            <div class="content mt-4 mb-4">
+                <div class="is-flex is-align-items-center" style="background: #f8fafc; padding: 10px; border-radius: 8px;">
+                    <span class="icon has-text-warning mr-2">
+                        <i class="fas fa-trophy"></i>
+                    </span>
+                    <div>
+                        <p class="is-size-7 has-text-grey mb-0 is-uppercase has-text-weight-bold">Contributions</p>
+                        <p class="is-size-6 has-text-weight-semibold">
+                            {{ item.contrib_count }} 
+                            <span class="is-size-7 has-text-grey-light">points</span>
+                        </p>
+                    </div>
+                    <div class="ml-auto">
+                        {% if item.stars > 0 %}
+                             <div class="has-text-warning is-size-7">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= item.stars %}
+                                        <i class="fas fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                             </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons is-centered are-small">
+                <a class="button is-light is-fullwidth" href="{% url 'profile' item.user.username %}">
+                    View Profile
+                </a>
                 {% if item.profile.codeforces_handle %}
-                  <a class="button is-small is-link" href="https://codeforces.com/profile/{{ item.profile.codeforces_handle }}" target="_blank" rel="noopener noreferrer">View Codeforces</a>
+                  <a class="button is-ghost is-fullwidth" href="https://codeforces.com/profile/{{ item.profile.codeforces_handle }}" target="_blank">
+                    <span class="icon"><i class="fas fa-external-link-alt"></i></span>
+                    <span>Codeforces</span>
+                  </a>
                 {% else %}
-                  <a class="button is-small is-light" disabled>View Codeforces</a>
+                  <button class="button is-ghost is-fullwidth" disabled>
+                    <span class="has-text-grey-light">No Handle</span>
+                  </button>
                 {% endif %}
-                <a class="button is-small" href="{% url 'profile' item.user.username %}">View Profile</a>
-              </p>
             </div>
+
           </div>
         </div>
+
       </div>
     {% endfor %}
   </div>
+
 {% else %}
-  <p>No users</p>
+  <div class="has-text-centered py-6">
+    <span class="icon is-large has-text-grey-lighter mb-3">
+        <i class="fas fa-users-slash fa-3x"></i>
+    </span>
+    <p class="is-size-5 has-text-grey">No users found.</p>
+  </div>
 {% endif %}
+
+<style>
+    .user-card {
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 12px;
+        height: 100%;
+    }
+    .user-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
+    .hover-primary:hover {
+        color: #4f46e5 !important;
+    }
+</style>
 {% endblock %}

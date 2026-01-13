@@ -217,7 +217,8 @@ class AddProblemView(LoginRequiredMixin, View):
                 index = p.get('index')
                 tags = p.get('tags', [])
                 problem_obj = Problem.objects.create(
-                    name=name, problem_id=pid, contest_id=contest_id, index=index, owner=request.user
+                    name=name, problem_id=pid, contest_id=contest_id, index=index, owner=request.user,
+                    codeforces_rating=p.get('rating')
                 )
                 for t in tags:
                     tag_obj, _ = Tag.objects.get_or_create(name=t)

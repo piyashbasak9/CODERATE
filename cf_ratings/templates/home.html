@@ -29,6 +29,7 @@
             <th class="has-text-grey-light is-size-7 is-uppercase">ID</th>
             <th class="has-text-grey-light is-size-7 is-uppercase" style="width: 25%;">Problem Name</th>
             <th class="has-text-grey-light is-size-7 is-uppercase">Tags</th>
+            <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered">CF Rating</th>
             <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered">Avg Rating</th>
             <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered">Your Rating</th>
             <th class="has-text-grey-light is-size-7 is-uppercase has-text-centered" style="width: 200px;">Status</th>
@@ -63,6 +64,14 @@
                     <span class="tag is-white is-rounded is-small">+{{ p.tags.all|length|add:"-3" }}</span>
                   {% endif %}
                 </div>
+              </td>
+
+              <td class="is-vcentered has-text-centered">
+                {% if p.codeforces_rating %}
+                  <span class="tag is-info is-light is-rounded has-text-weight-semibold">{{ p.codeforces_rating }}</span>
+                {% else %}
+                  <span class="has-text-grey-light is-size-7">-</span>
+                {% endif %}
               </td>
 
               <td class="is-vcentered has-text-centered">

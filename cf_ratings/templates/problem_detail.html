@@ -60,6 +60,22 @@
             </div>
         </div>
 
+        <div class="card mt-4">
+            <div class="card-content has-text-centered">
+                <p class="heading">Codeforces Rating</p>
+                <div class="is-flex is-justify-content-center is-align-items-center my-3">
+                    <span class="title is-3 has-text-weight-bold">
+                        {% if problem.codeforces_rating %}
+                            {{ problem.codeforces_rating }}
+                        {% else %}
+                            <span class="has-text-grey-light">N/A</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <p class="is-size-7 has-text-grey">Official difficulty on Codeforces</p>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-content">
                 <p class="heading mb-3">
