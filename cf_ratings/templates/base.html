@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CF Ratings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+      body {
+        background: #0f172a;
+        min-height: 100vh;
+      }
+      .brand-gradient {
+        background: linear-gradient(135deg, #6366f1, #ec4899);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 700;
+      }
+      .main-card {
+        margin-top: 1.5rem;
+      }
+    </style>
+</head>
+<body>
+<section class="hero is-primary is-small">
+  <div class="hero-head">
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="{% url 'home' %}">
+            <span class="brand-gradient">CF Ratings</span>
+          </a>
+
+          <a role="button" class="navbar-burger" aria-label="menu"
+             aria-expanded="false" data-target="navbarMain">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div id="navbarMain" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="{% url 'home' %}">
+              <span class="icon"><i class="fas fa-home"></i></span>
+              <span>Home</span>
+            </a>
+            <a class="navbar-item" href="{% url 'search' %}">
+              <span class="icon"><i class="fas fa-search"></i></span>
+              <span>Search</span>
+            </a>
+            <a class="navbar-item" href="{% url 'users_list' %}">
+              <span class="icon"><i class="fas fa-users"></i></span>
+              <span>Users</span>
+            </a>
+          </div>
+
+          <div class="navbar-end">
+            {% if user.is_authenticated %}
+              <div class="navbar-item">
+                <span class="icon"><i class="fas fa-user-circle"></i></span>
+                <span class="ml-1">
+                  Hello,
+                  <a href="{% url 'profile' user.username %}" class="has-text-weight-semibold">
+                    {{ user.username }}
+                  </a>
+                </span>
+              </div>
+              <div class="navbar-item">
+                <a class="button is-light is-small" href="{% url 'logout' %}">
+                  <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                  <span>Logout</span>
+                </a>
+              </div>
+            {% else %}
+              <div class="navbar-item">
+                <a class="button is-light is-small" href="{% url 'login' %}">
+                  <span class="icon"><i class="fas fa-sign-in-alt"></i></span>
+                  <span>Login</span>
+                </a>
+              </div>
+              <div class="navbar-item">
+                <a class="button is-primary is-inverted is-outlined is-small"
+                   href="{% url 'register' %}">
+                  <span class="icon"><i class="fas fa-user-plus"></i></span>
+                  <span>Register</span>
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="hero-body">
+    <div class="container">
+      <div class="card main-card">
+        <div class="card-content">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="notification is-{{ message.tags }}">
+                <button class="delete"></button>
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer has-background-dark has-text-light" style="padding:1.25rem 0; margin-top:1.25rem">
+  <div class="container">
+    <div class="columns is-mobile is-vcentered">
+      <div class="column">
+        <p class="is-size-7">&copy; {% now "Y" %} <span class="has-text-weight-semibold">CF Ratings</span> — Community Problem Ratings</p>
+        <p class="is-size-7">Built with ❤️ and <span class="has-text-weight-semibold">Django</span></p>
+      </div>
+      <div class="column has-text-right">
+        <p class="is-size-7"><a class="has-text-light" href="https://github.com/" target="_blank" rel="noopener noreferrer"><span class="icon"><i class="fab fa-github"></i></span> Source</a></p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // simple burger toggle
+  document.addEventListener('DOMContentLoaded', () => {
+    const burgers = Array.from(document.querySelectorAll('.navbar-burger'));
+    burgers.forEach(burger => {
+      burger.addEventListener('click', () => {
+        const targetId = burger.dataset.target;
+        const target = document.getElementById(targetId);
+        burger.classList.toggle('is-active');
+        if (target) {
+          target.classList.toggle('is-active');
+        }
+      });
+    });
+
+    // close notifications
+    const deletes = Array.from(document.querySelectorAll('.notification .delete'));
+    deletes.forEach(del => {
+      del.addEventListener('click', () => {
+        const parent = del.parentNode;
+        if (parent) parent.parentNode.removeChild(parent);
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">{{ problem.name }}</h1>
+<p>Problem ID: {{ problem.problem_id }}</p>
+<p>Contest: {{ problem.contest_id }}{{ problem.index }}</p>
+<p>Tags: {% for t in problem.tags.all %}<span class="tag">{{ t.name }}</span> {% endfor %}</p>
+<p>Average Rating: {{ problem.average_rating }}</p>
+
+{% if user.is_authenticated %}
+  <h2>Your Rating</h2>
+  <form method="post" action="{% url 'rate_problem' problem.problem_id %}">{% csrf_token %}
+    {{ rating_form.as_p }}
+    <button class="button is-primary">Save Rating</button>
+  </form>
+{% endif %}
+
+{% endblock %}

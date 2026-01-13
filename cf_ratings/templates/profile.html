@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Profile: {{ profile_user.username }}</h1>
+{% if profile.profile_picture %}
+  <figure class="image is-128x128">
+    <img src="{{ profile.profile_picture.url }}" alt="Profile picture">
+  </figure>
+{% endif %}
+<p><strong>Codeforces handle:</strong> {{ profile.codeforces_handle }}</p>
+{% if cf_data %}
+  <p><strong>Rating:</strong> {{ cf_data.rating }} | <strong>Max Rating:</strong> {{ cf_data.maxRating }}</p>
+  <p><strong>Rank:</strong> {{ cf_data.rank }} | <strong>Max Rank:</strong> {{ cf_data.maxRank }}</p>
+{% elif profile.rating %}
+  <p><strong>Rating:</strong> {{ profile.rating }} | <strong>Max Rating:</strong> {{ profile.max_rating }}</p>
+{% endif %}
+{% if profile.bio %}
+  <h2 class="subtitle">Bio</h2>
+  <p>{{ profile.bio|linebreaks }}</p>
+{% endif %}
+
+{% if user.username == profile_user.username %}
+  <h2>Edit Profile</h2>
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    {{ form.as_p }}
+    <button class="button is-primary">Save</button>
+  </form>
+{% else %}
+  <p><em>You can only edit your own profile.</em></p>
+{% endif %}
+
+{% if user_problems %}
+  <h2 class="subtitle">Problems added or rated by {{ profile_user.username }}</h2>
+  <table class="table is-fullwidth is-striped">
+    <thead>
+      <tr><th>Name</th><th>ID</th><th>Tags</th><th>Avg Rating</th><th>Your Rating</th><th>Link</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for p in user_problems %}
+        <tr>
+          <td><a href="{% url 'problem_detail' p.problem_id %}">{{ p.name }}</a></td>
+          <td>{{ p.problem_id }}</td>
+          <td>{% for t in p.tags.all %} <span class="tag">{{ t.name }}</span> {% endfor %}</td>
+          <td>{{ p.average_rating }}</td>
+          <td>
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'rate_problem' p.problem_id %}" style="display:inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <div class="field has-addons">
+                  <div class="control">
+                    <div class="select">
+                      <select name="value">
+                        {% for val in rating_choices %}
+                          <option value="{{ val }}" {% if p.user_rating == val %}selected{% endif %}>{{ val }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="control">
+                    <button class="button is-small is-info">Save</button>
+                  </div>
+                </div>
+              </form>
+            {% else %}
+              <a href="{% url 'login' %}">Login to rate</a>
+            {% endif %}
+          </td>
+          <td>
+            <a class="button is-link is-small" href="https://codeforces.com/problemset/problem/{{ p.contest_id }}/{{ p.index }}" target="_blank" rel="noopener noreferrer">Problem Link</a>
+          </td>
+          <td>
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="display:inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="pending">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="button is-small {% if p.user_status == 'pending' %}is-warning{% else %}is-light{% endif %}">Pending</button>
+              </form>
+              <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="display:inline-block; margin-left:6px">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="solved">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="button is-small {% if p.user_status == 'solved' %}is-success{% else %}is-light{% endif %}">Solved</button>
+              </form>
+            {% else %}
+              <a href="{% url 'login' %}" class="button is-small is-light">Login</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}

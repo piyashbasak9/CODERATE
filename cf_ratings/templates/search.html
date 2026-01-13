@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Search</h1>
+<div class="columns">
+  <div class="column">
+    <h2 class="subtitle">By Tag</h2>
+    <form method="get">
+      <div class="field">
+        <label class="label">Select a tag</label>
+        <div class="control">
+          <label class="radio"><input type="radio" name="tag" value="" {% if not query %}checked{% endif %}> All</label>
+          {% for t in tags %}
+            <label class="radio"><input type="radio" name="tag" value="{{ t.name }}" {% if query == t.name %}checked{% endif %}> {{ t.name }}</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <button class="button is-info">Search</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="column">
+    <h2 class="subtitle">By Problem ID</h2>
+    <form method="get" class="field">
+      <div class="control">
+        <input class="input" type="text" name="problem_id" placeholder="e.g., 1234A" value="{{ request.GET.problem_id }}">
+      </div>
+      <div class="field" style="margin-top:8px">
+        <div class="control">
+          <button class="button is-info">Find by ID</button>
+        </div>
+      </div>
+    </form>
+    {% if id_not_found %}
+      <div class="notification is-warning" style="margin-top:8px">Problem with ID "{{ id_query }}" is not in the database.</div>
+    {% endif %}
+  </div>
+</div>
+{% if results is not None %}
+  {% if query == '' %}
+    <h2 class="subtitle">All problems</h2>
+  {% else %}
+    <h2 class="subtitle">Results for "{{ query }}"</h2>
+  {% endif %}
+  <table class="table is-fullwidth is-striped">
+    <thead>
+      <tr><th>Name</th><th>ID</th><th>Tags</th><th>Avg Rating</th><th>Your Rating</th><th>Link</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for p in results %}
+        <tr>
+          <td><a href="{% url 'problem_detail' p.problem_id %}">{{ p.name }}</a></td>
+          <td>{{ p.problem_id }}</td>
+          <td>{% for t in p.tags.all %} <span class="tag">{{ t.name }}</span> {% endfor %}</td>
+          <td>{{ p.average_rating }}</td>
+          <td>
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'rate_problem' p.problem_id %}" style="display:inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <div class="field has-addons">
+                  <div class="control">
+                    <div class="select">
+                      <select name="value">
+                        {% for val in rating_choices %}
+                          <option value="{{ val }}" {% if p.user_rating == val %}selected{% endif %}>{{ val }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="control">
+                    <button class="button is-small is-info">Save</button>
+                  </div>
+                </div>
+              </form>
+            {% else %}
+              <a href="{% url 'login' %}">Login to rate</a>
+            {% endif %}
+          </td>
+          <td>
+            <a class="button is-link is-small" href="https://codeforces.com/problemset/problem/{{ p.contest_id }}/{{ p.index }}" target="_blank" rel="noopener noreferrer">Problem Link</a>
+          </td>
+          <td>
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="display:inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="pending">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="button is-small {% if p.user_status == 'pending' %}is-warning{% else %}is-light{% endif %}">Pending</button>
+              </form>
+              <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="display:inline-block; margin-left:6px">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="solved">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="button is-small {% if p.user_status == 'solved' %}is-success{% else %}is-light{% endif %}">Solved</button>
+              </form>
+            {% else %}
+              <a href="{% url 'login' %}" class="button is-small is-light">Login</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7">No results</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}
