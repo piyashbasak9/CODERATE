@@ -129,7 +129,7 @@
 
                             <td class="is-vcentered has-text-centered">
                                 {% if p.codeforces_rating %}
-                                    <span class="tag is-info is-light">{{ p.codeforces_rating }}</span>
+                                    <span class="tag is-info is-light">{{ p.codeforces_rating }}{% if p.codeforces_rating_estimated %} <span class="is-size-7 has-text-warning">(est)</span>{% endif %}</span>
                                 {% else %}
                                     <span class="is-size-7 has-text-grey-light">-</span>
                                 {% endif %}
