@@ -1,110 +1,214 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1 class="title">Search</h1>
-<div class="columns">
-  <div class="column">
-    <h2 class="subtitle">By Tag</h2>
-    <form method="get">
-      <div class="field">
-        <label class="label">Select a tag</label>
-        <div class="control">
-          <label class="radio"><input type="radio" name="tag" value="" {% if not query %}checked{% endif %}> All</label>
-          {% for t in tags %}
-            <label class="radio"><input type="radio" name="tag" value="{{ t.name }}" {% if query == t.name %}checked{% endif %}> {{ t.name }}</label>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="field">
-        <div class="control">
-          <button class="button is-info">Search</button>
-        </div>
-      </div>
-    </form>
-  </div>
-  <div class="column">
-    <h2 class="subtitle">By Problem ID</h2>
-    <form method="get" class="field">
-      <div class="control">
-        <input class="input" type="text" name="problem_id" placeholder="e.g., 1234A" value="{{ request.GET.problem_id }}">
-      </div>
-      <div class="field" style="margin-top:8px">
-        <div class="control">
-          <button class="button is-info">Find by ID</button>
-        </div>
-      </div>
-    </form>
-    {% if id_not_found %}
-      <div class="notification is-warning" style="margin-top:8px">Problem with ID "{{ id_query }}" is not in the database.</div>
-    {% endif %}
-  </div>
-</div>
-{% if results is not None %}
-  {% if query == '' %}
-    <h2 class="subtitle">All problems</h2>
-  {% else %}
-    <h2 class="subtitle">Results for "{{ query }}"</h2>
-  {% endif %}
-  <table class="table is-fullwidth is-striped">
-    <thead>
-      <tr><th>Name</th><th>ID</th><th>Tags</th><th>Avg Rating</th><th>Your Rating</th><th>Link</th><th>Status</th></tr>
-    </thead>
-    <tbody>
-      {% for p in results %}
-        <tr>
-          <td><a href="{% url 'problem_detail' p.problem_id %}">{{ p.name }}</a></td>
-          <td>{{ p.problem_id }}</td>
-          <td>{% for t in p.tags.all %} <span class="tag">{{ t.name }}</span> {% endfor %}</td>
-          <td>{{ p.average_rating }}</td>
-          <td>
-            {% if user.is_authenticated %}
-              <form method="post" action="{% url 'rate_problem' p.problem_id %}" style="display:inline-block">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <div class="field has-addons">
-                  <div class="control">
-                    <div class="select">
-                      <select name="value">
-                        {% for val in rating_choices %}
-                          <option value="{{ val }}" {% if p.user_rating == val %}selected{% endif %}>{{ val }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                  </div>
-                  <div class="control">
-                    <button class="button is-small is-info">Save</button>
-                  </div>
+<div class="mb-6">
+    <div class="has-text-centered mb-5">
+        <h1 class="title is-3" style="color: #0f172a;">Find Problems</h1>
+        <p class="subtitle is-6 has-text-grey">Filter by topic or search for a specific problem ID.</p>
+    </div>
+
+    <div class="columns is-variable is-6">
+        
+        <div class="column is-8">
+            <div class="card h-100">
+                <div class="card-content">
+                    <p class="heading has-text-grey mb-3">
+                        <i class="fas fa-tags mr-1"></i> Filter by Topic
+                    </p>
+                    
+                    <form method="get" id="tagForm">
+                        <div class="field is-grouped is-grouped-multiline">
+                            <div class="control">
+                                <label class="radio-tag">
+                                    <input type="radio" name="tag" value="" {% if not query %}checked{% endif %} onchange="this.form.submit()">
+                                    <span class="tag is-medium is-rounded {% if not query %}is-primary{% else %}is-light{% endif %}">
+                                        All
+                                    </span>
+                                </label>
+                            </div>
+
+                            {% for t in tags %}
+                                <div class="control">
+                                    <label class="radio-tag">
+                                        <input type="radio" name="tag" value="{{ t.name }}" {% if query == t.name %}checked{% endif %} onchange="this.form.submit()">
+                                        <span class="tag is-medium is-rounded {% if query == t.name %}is-primary{% else %}is-light{% endif %}">
+                                            {{ t.name }}
+                                        </span>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <noscript><button class="button is-small is-primary mt-2">Apply Filter</button></noscript>
+                    </form>
                 </div>
-              </form>
-            {% else %}
-              <a href="{% url 'login' %}">Login to rate</a>
-            {% endif %}
-          </td>
-          <td>
-            <a class="button is-link is-small" href="https://codeforces.com/problemset/problem/{{ p.contest_id }}/{{ p.index }}" target="_blank" rel="noopener noreferrer">Problem Link</a>
-          </td>
-          <td>
-            {% if user.is_authenticated %}
-              <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="display:inline-block">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="pending">
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button class="button is-small {% if p.user_status == 'pending' %}is-warning{% else %}is-light{% endif %}">Pending</button>
-              </form>
-              <form method="post" action="{% url 'mark_problem' p.problem_id %}" style="display:inline-block; margin-left:6px">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="solved">
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button class="button is-small {% if p.user_status == 'solved' %}is-success{% else %}is-light{% endif %}">Solved</button>
-              </form>
-            {% else %}
-              <a href="{% url 'login' %}" class="button is-small is-light">Login</a>
-            {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="7">No results</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+            </div>
+        </div>
+
+        <div class="column is-4">
+            <div class="card h-100">
+                <div class="card-content">
+                    <p class="heading has-text-grey mb-3">
+                        <i class="fas fa-search mr-1"></i> Search ID
+                    </p>
+                    <form method="get">
+                        <div class="field has-addons">
+                            <div class="control is-expanded has-icons-left">
+                                <input class="input is-rounded" type="text" name="problem_id" placeholder="e.g. 4A" value="{{ request.GET.problem_id }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-hashtag"></i>
+                                </span>
+                            </div>
+                            <div class="control">
+                                <button class="button is-info is-rounded">
+                                    Find
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    {% if id_not_found %}
+                        <div class="notification is-warning is-light mt-3 is-size-7">
+                            <button class="delete"></button>
+                            <i class="fas fa-exclamation-triangle mr-1"></i> 
+                            Problem <strong>{{ id_query }}</strong> not found.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results is not None %}
+    <div class="box" style="border: 1px solid #e2e8f0; box-shadow: none;">
+        <div class="level mb-4">
+            <div class="level-left">
+                <h2 class="title is-5 has-text-weight-bold">
+                    {% if query %}
+                        Results for <span class="has-text-primary">"{{ query }}"</span>
+                    {% elif request.GET.problem_id %}
+                        Result for ID <span class="has-text-primary">"{{ request.GET.problem_id }}"</span>
+                    {% else %}
+                        All Problems
+                    {% endif %}
+                </h2>
+            </div>
+            <div class="level-right">
+                <span class="tag is-light is-rounded">{{ results|length }} problems found</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table is-fullwidth is-hoverable">
+                <thead>
+                    <tr style="border-bottom: 2px solid #f1f5f9;">
+                        <th class="has-text-grey-light is-size-7">ID</th>
+                        <th class="has-text-grey-light is-size-7">Name</th>
+                        <th class="has-text-grey-light is-size-7">Tags</th>
+                        <th class="has-text-grey-light is-size-7 has-text-centered">Avg Rating</th>
+                        <th class="has-text-grey-light is-size-7 has-text-centered">Your Rating</th>
+                        <th class="has-text-grey-light is-size-7 has-text-centered">Status</th>
+                        <th class="has-text-grey-light is-size-7 has-text-right">Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in results %}
+                        <tr>
+                            <td class="is-vcentered"><span class="tag is-white" style="border:1px solid #ddd">{{ p.problem_id }}</span></td>
+                            <td class="is-vcentered">
+                                <a href="{% url 'problem_detail' p.problem_id %}" class="has-text-dark has-text-weight-semibold">{{ p.name }}</a>
+                            </td>
+                            <td class="is-vcentered">
+                                <div class="tags">
+                                    {% for t in p.tags.all|slice:":2" %}
+                                        <span class="tag is-light is-small">{{ t.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td class="is-vcentered has-text-centered">
+                                {% if p.average_rating > 0 %}
+                                    <span class="tag is-warning is-light is-rounded">
+                                        <i class="fas fa-star mr-1" style="font-size:10px;"></i> {{ p.average_rating|floatformat:1 }}
+                                    </span>
+                                {% else %}
+                                    <span class="is-size-7 has-text-grey-light">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="is-vcentered has-text-centered">
+                                {% if user.is_authenticated %}
+                                    <form method="post" action="{% url 'rate_problem' p.problem_id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <div class="select is-small is-rounded">
+                                            <select name="value" onchange="this.form.submit()">
+                                                <option value="" disabled>Rate</option>
+                                                {% for i in "123456789"|make_list %}
+                                                    <option value="{{ forloop.counter }}" {% if p.user_rating == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                                                {% endfor %}
+                                                <option value="10" {% if p.user_rating == 10 %}selected{% endif %}>10</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <span class="is-size-7">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="is-vcentered has-text-centered">
+                                {% if user.is_authenticated %}
+                                    <div class="buttons is-centered are-small has-addons">
+                                        <form method="post" action="{% url 'mark_problem' p.problem_id %}" class="mb-0">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="status" value="pending">
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            <button class="button {% if p.user_status == 'pending' %}is-warning{% else %}is-light{% endif %}" title="Pending">
+                                                <i class="fas fa-clock"></i>
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{% url 'mark_problem' p.problem_id %}" class="mb-0">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="status" value="solved">
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            <button class="button {% if p.user_status == 'solved' %}is-success{% else %}is-light{% endif %}" title="Solved">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="is-vcentered has-text-right">
+                                <a href="https://codeforces.com/problemset/problem/{{ p.contest_id }}/{{ p.index }}" target="_blank" class="button is-small is-ghost">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="has-text-centered py-5 has-text-grey">
+                                No problems found matching your criteria.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endif %}
+
+<style>
+    /* CSS to hide radio buttons but keep accessibility */
+    .radio-tag input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+    /* Change cursor on hover */
+    .radio-tag span.tag {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .radio-tag span.tag:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
 {% endblock %}
