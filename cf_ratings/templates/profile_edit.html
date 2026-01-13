@@ -1,8 +1,112 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1 class="title">Edit Profile</h1>
-<form method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <button class="button is-primary">Save</button>
-</form>
+<div class="columns is-centered">
+  <div class="column is-6-desktop is-8-tablet">
+
+    <div class="has-text-centered mb-5">
+        <div class="is-inline-block p-3 has-background-primary-light is-rounded mb-3">
+            <span class="icon is-large has-text-primary">
+                <i class="fas fa-user-edit fa-2x"></i>
+            </span>
+        </div>
+        <h1 class="title is-3 has-text-weight-bold" style="color: #0f172a;">
+            Edit Profile
+        </h1>
+        <p class="subtitle is-6 has-text-grey">
+            Update your personal information and preferences.
+        </p>
+    </div>
+
+    <div class="card" style="border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);">
+      <div class="card-content">
+        
+        <form method="post" enctype="multipart/form-data" class="custom-form-style">
+          {% csrf_token %}
+          
+          {% if form.non_field_errors %}
+            <div class="notification is-danger is-light">
+              <button type="button" class="delete" onclick="this.parentElement.remove()"></button>
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          {% for field in form %}
+            <div class="field mb-4">
+                <label class="label has-text-grey-dark" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+                <div class="control">
+                    {{ field }}
+                </div>
+                {% if field.help_text %}
+                    <p class="help has-text-grey">{{ field.help_text }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p class="help is-danger">
+                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                    </p>
+                {% endfor %}
+            </div>
+          {% endfor %}
+
+          <hr style="background-color: #f1f5f9; height: 1px;">
+
+          <div class="field is-grouped is-grouped-right mt-5">
+            <div class="control">
+                <a href="{% url 'profile' user.username %}" class="button is-light is-rounded">
+                    Cancel
+                </a>
+            </div>
+            <div class="control">
+                <button class="button is-primary is-rounded has-shadow">
+                    <span class="icon is-small"><i class="fas fa-save"></i></span>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+    /* Target inputs, textareas, and selects inside our custom form */
+    .custom-form-style input[type="text"],
+    .custom-form-style input[type="email"],
+    .custom-form-style input[type="password"],
+    .custom-form-style input[type="url"],
+    .custom-form-style input[type="number"],
+    .custom-form-style textarea,
+    .custom-form-style select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #363636;
+        background-color: #fff;
+        border: 1px solid #dbdbdb;
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* Focus state */
+    .custom-form-style input:focus,
+    .custom-form-style textarea:focus,
+    .custom-form-style select:focus {
+        outline: none;
+        border-color: #4f46e5; /* Primary color */
+        box-shadow: 0 0 0 0.125em rgba(79, 70, 229, 0.25);
+    }
+
+    /* File input styling tweak */
+    .custom-form-style input[type="file"] {
+        padding: 0.5rem;
+        background: #f8fafc;
+    }
+</style>
 {% endblock %}

@@ -76,9 +76,9 @@
                                 <div class="select is-fullwidth is-rounded">
                                     <select name="value">
                                         <option value="" disabled selected>Select a score (1-10)</option>
-                                        {% for i in "123456789"|make_list %} <option value="{{ forloop.counter }}">{{ forloop.counter }} - Easy</option>
+                                        {% for i in "123456789"|make_list %} <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
                                         {% endfor %}
-                                        <option value="10">10 - Hardest</option>
+                                        <option value="10">10</option>
                                     </select>
                                 </div>
                                 <span class="icon is-left">
