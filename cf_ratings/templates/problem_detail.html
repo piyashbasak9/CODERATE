@@ -1,17 +1,111 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1 class="title">{{ problem.name }}</h1>
-<p>Problem ID: {{ problem.problem_id }}</p>
-<p>Contest: {{ problem.contest_id }}{{ problem.index }}</p>
-<p>Tags: {% for t in problem.tags.all %}<span class="tag">{{ t.name }}</span> {% endfor %}</p>
-<p>Average Rating: {{ problem.average_rating }}</p>
+<div class="columns is-variable is-6">
+    
+    <div class="column is-7">
+        
+        <div class="mb-5">
+            <div class="tags has-addons mb-2">
+                <span class="tag is-dark">ID</span>
+                <span class="tag is-primary">{{ problem.problem_id }}</span>
+            </div>
+            <h1 class="title is-2 has-text-weight-bold" style="color: #0f172a;">
+                {{ problem.name }}
+            </h1>
+            <p class="subtitle is-5 has-text-grey">
+                <i class="fas fa-trophy mr-2 has-text-warning"></i>
+                Contest: <strong>{{ problem.contest_id }}</strong> | Index: <strong>{{ problem.index }}</strong>
+            </p>
+        </div>
 
-{% if user.is_authenticated %}
-  <h2>Your Rating</h2>
-  <form method="post" action="{% url 'rate_problem' problem.problem_id %}">{% csrf_token %}
-    {{ rating_form.as_p }}
-    <button class="button is-primary">Save Rating</button>
-  </form>
-{% endif %}
+        <div class="box" style="border: 1px dashed #cbd5e1; box-shadow: none; background: #f8fafc;">
+            <p class="heading has-text-grey mb-3">Problem Tags</p>
+            <div class="tags are-medium">
+                {% for t in problem.tags.all %}
+                    <span class="tag is-white" style="border: 1px solid #e2e8f0; color: #475569;">
+                        <i class="fas fa-hashtag mr-1 has-text-info"></i> {{ t.name }}
+                    </span>
+                {% empty %}
+                    <span class="has-text-grey-light is-size-7">No tags available</span>
+                {% endfor %}
+            </div>
+        </div>
 
+        <div class="mt-5">
+            <a href="https://codeforces.com/problemset/problem/{{ problem.contest_id }}/{{ problem.index }}" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="button is-link is-medium is-fullwidth is-outlined is-rounded">
+                <span>Solve on Codeforces</span>
+                <span class="icon is-small"><i class="fas fa-external-link-alt"></i></span>
+            </a>
+            <p class="help has-text-centered mt-2">Opens in a new tab</p>
+        </div>
+    </div>
+
+    <div class="column is-5">
+        
+        <div class="card mb-5" style="border-top: 4px solid #f59e0b;"> <div class="card-content has-text-centered">
+                <p class="heading">Community Rating</p>
+                <div class="is-flex is-justify-content-center is-align-items-center my-3">
+                    <span class="icon is-large has-text-warning mr-2">
+                        <i class="fas fa-star fa-3x"></i>
+                    </span>
+                    <span class="title is-1 has-text-weight-bold ml-2">
+                        {{ problem.average_rating|floatformat:1 }}
+                    </span>
+                </div>
+                <p class="is-size-7 has-text-grey">Based on user submissions</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <p class="heading mb-3">
+                    <i class="fas fa-user-check mr-1"></i> Your Rating
+                </p>
+
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'rate_problem' problem.problem_id %}">
+                        {% csrf_token %}
+                        
+                        <div class="field">
+                            <label class="label is-small has-text-grey">How difficult was this?</label>
+                            <div class="control has-icons-left">
+                                <div class="select is-fullwidth is-rounded">
+                                    <select name="value">
+                                        <option value="" disabled selected>Select a score (1-10)</option>
+                                        {% for i in "123456789"|make_list %} <option value="{{ forloop.counter }}">{{ forloop.counter }} - Easy</option>
+                                        {% endfor %}
+                                        <option value="10">10 - Hardest</option>
+                                    </select>
+                                </div>
+                                <span class="icon is-left">
+                                    <i class="fas fa-sliders-h"></i>
+                                </span>
+                            </div>
+                            <p class="help">1 = Very Easy, 10 = Impossible</p>
+                        </div>
+                        
+                        <div class="field mt-4">
+                            <button class="button is-primary is-fullwidth is-rounded shadow-button">
+                                <span class="icon"><i class="fas fa-check"></i></span>
+                                <span>Save My Rating</span>
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="notification is-light has-text-centered">
+                        <p class="mb-3">Log in to rate this problem.</p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="button is-small is-primary is-outlined">
+                            Login Now
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
