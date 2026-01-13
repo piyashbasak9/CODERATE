@@ -1,8 +1,84 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1 class="title">Register</h1>
-<form method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <button class="button is-primary">Register</button>
-</form>
+<div class="columns is-centered is-vcentered" style="min-height: 70vh;">
+  <div class="column is-4-desktop is-6-tablet">
+    
+    <div class="has-text-centered mb-5">
+        <span class="icon is-large has-text-primary mb-2">
+            <i class="fas fa-rocket fa-3x"></i>
+        </span>
+        <h1 class="title is-3">Join the Community</h1>
+        <p class="subtitle is-6 has-text-grey">Create your account to start tracking problems.</p>
+    </div>
+
+    <div class="box" style="border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+      
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="notification is-danger is-light is-small">
+                <button type="button" class="delete" onclick="this.parentElement.remove()"></button>
+                {% for error in form.non_field_errors %}
+                    <p><i class="fas fa-exclamation-circle mr-1"></i> {{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="field mb-4">
+                <label class="label has-text-grey-dark">{{ field.label }}</label>
+                <div class="control has-icons-left">
+                    <input 
+                        type="{{ field.field.widget.input_type }}" 
+                        name="{{ field.name }}" 
+                        id="{{ field.id_for_label }}" 
+                        class="input is-rounded is-medium {% if field.errors %}is-danger{% endif %}"
+                        placeholder="{{ field.label }}"
+                        {% if field.value %}value="{{ field.value }}"{% endif %}
+                        {% if field.field.required %}required{% endif %}
+                    >
+                    <span class="icon is-small is-left">
+                        {% if 'password' in field.name %}
+                            <i class="fas fa-lock"></i>
+                        {% elif 'email' in field.name %}
+                            <i class="fas fa-envelope"></i>
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if field.help_text %}
+                    <p class="help has-text-grey is-size-7 mt-1" style="line-height: 1.4;">
+                        {{ field.help_text|safe }}
+                    </p>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="help is-danger">
+                        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                    </p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div class="field mt-5">
+            <button class="button is-primary is-fullwidth is-rounded is-medium shadow-button">
+                <strong>Create Account</strong>
+            </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="has-text-centered mt-4">
+        <p class="is-size-7 has-text-grey">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="has-text-primary has-text-weight-bold">Log in here</a>
+        </p>
+    </div>
+
+  </div>
+</div>
 {% endblock %}
